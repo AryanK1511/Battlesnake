@@ -5,7 +5,6 @@ import typing
 from flask import Flask
 from flask import request
 
-
 def run_server(handlers: typing.Dict):
     app = Flask("Battlesnake")
 
@@ -33,7 +32,7 @@ def run_server(handlers: typing.Dict):
     @app.after_request
     def identify_server(response):
         response.headers.set(
-            "server", "battlesnake/github/starter-snake-python"
+            "server", "battlesnake/replit/starter-snake-python"
         )
         return response
 

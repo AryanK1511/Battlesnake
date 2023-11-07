@@ -1,21 +1,16 @@
 import random
 import typing
 
-
-# info is called when you create your Battlesnake on play.battlesnake.com
-# and controls your Battlesnake's appearance
-# TIP: If you open your Battlesnake URL in a browser you should see this data
 def info() -> typing.Dict:
     print("INFO")
 
     return {
         "apiversion": "1",
-        "author": "",  # TODO: Your Battlesnake Username
+        "author": "AryanK1511",  # TODO: Your Battlesnake Username
         "color": "#888888",  # TODO: Choose color
         "head": "default",  # TODO: Choose head
         "tail": "default",  # TODO: Choose tail
     }
-
 
 # start is called when your Battlesnake begins a game
 def start(game_state: typing.Dict):
@@ -32,7 +27,14 @@ def end(game_state: typing.Dict):
 # See https://docs.battlesnake.com/api/example-move for available data
 def move(game_state: typing.Dict) -> typing.Dict:
 
-    is_move_safe = {"up": True, "down": True, "left": True, "right": True}
+    print(game_state)
+
+    is_move_safe = {
+      "up": True, 
+      "down": True, 
+      "left": True, 
+      "right": True
+    }
 
     # We've included code to prevent your Battlesnake from moving backwards
     my_head = game_state["you"]["body"][0]  # Coordinates of your head
@@ -84,4 +86,9 @@ def move(game_state: typing.Dict) -> typing.Dict:
 if __name__ == "__main__":
     from server import run_server
 
-    run_server({"info": info, "start": start, "move": move, "end": end})
+    run_server({
+        "info": info, 
+        "start": start, 
+         "move": move, 
+        "end": end
+    })
