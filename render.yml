@@ -1,0 +1,5 @@
+services:
+  - name: web
+    env: python
+    buildCommand: docker build -t battlesnake -f Dockerfile .
+    startCommand: docker run -p 8000:8000 battlesnake
