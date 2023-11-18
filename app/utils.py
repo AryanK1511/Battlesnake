@@ -1,5 +1,13 @@
 from algorithms import a_star_algorithm, floodfill_algorithm
 
+def calculate_dynamic_threshold(game_state):
+    board_size = game_state["board"]["width"] * game_state["board"]["height"]
+    coverage_percentage = (game_state["you"]["length"] / board_size) * 100
+
+    # Adjust the threshold based on the coverage percentage
+    dynamic_threshold = 10 + coverage_percentage
+    return dynamic_threshold
+
 # ===== FOOD SEEKING LOGIC =====
 def search_for_food_and_move(game_state, is_move_safe, best_moves_for_food):
     my_head = game_state["you"]["body"][0]  
@@ -9,22 +17,30 @@ def search_for_food_and_move(game_state, is_move_safe, best_moves_for_food):
     if food:
         # Finding the invalid moves using floodfill
         # This is done so that we do not get ourselves into situations where we are trapped
-        moves = floodfill_algorithm.find_invalid_moves_using_floodfill(game_state, 15)
+        moves = floodfill_algorithm.find_invalid_moves_using_floodfill(game_state, calculate_dynamic_threshold(game_state))
         # If there are invalid moves, we follow floodfill
         if len(moves) > 0:
             for move in moves:
                 if move[0] < my_head['x']:
                     is_move_safe["right"] = True
-                    best_moves_for_food.append("right")
-                elif move[0] > my_head['x']:
-                    is_move_safe["left"] = True
-                    best_moves_for_food.append("left")
-                elif move[1] < my_head['y']:
+                    is_move_safe["left"] = False
                     is_move_safe["up"] = True
-                    best_moves_for_food.append("up")
-                elif move[1] > my_head['y']:
                     is_move_safe["down"] = True
-                    best_moves_for_food.append("down")
+                elif move[0] > my_head['x']:
+                    is_move_safe["right"] = False
+                    is_move_safe["left"] = True
+                    is_move_safe["up"] = True
+                    is_move_safe["down"] = True
+                elif move[1] < my_head['y']:
+                    is_move_safe["right"] = True
+                    is_move_safe["left"] = True
+                    is_move_safe["up"] = True
+                    is_move_safe["down"] = False
+                elif move[1] > my_head['y']:
+                    is_move_safe["right"] = True
+                    is_move_safe["left"] = True
+                    is_move_safe["up"] = False
+                    is_move_safe["down"] = True
         # If there are no invalid moves, we use A* algorithm
         else:
             # Find the closest food
