@@ -1,13 +1,5 @@
 from algorithms import a_star_algorithm, floodfill_algorithm
 
-def calculate_dynamic_threshold(game_state):
-    board_size = game_state["board"]["width"] * game_state["board"]["height"]
-    coverage_percentage = (game_state["you"]["length"] / board_size) * 100
-
-    # Adjust the threshold based on the coverage percentage
-    dynamic_threshold = 10 + coverage_percentage
-    return dynamic_threshold
-
 # ===== FOOD SEEKING LOGIC =====
 def search_for_food_and_move(game_state, is_move_safe, best_moves_for_food):
     my_head = game_state["you"]["body"][0]  
@@ -17,7 +9,7 @@ def search_for_food_and_move(game_state, is_move_safe, best_moves_for_food):
     if food:
         # Finding the invalid moves using floodfill
         # This is done so that we do not get ourselves into situations where we are trapped
-        moves = floodfill_algorithm.find_invalid_moves_using_floodfill(game_state, calculate_dynamic_threshold(game_state))
+        moves = floodfill_algorithm.find_invalid_moves_using_floodfill(game_state, 15)
         # If there are invalid moves, we follow floodfill
         if len(moves) > 0:
             for move in moves:
@@ -101,5 +93,38 @@ def prevent_collisions(game_state, is_move_safe):
                 is_move_safe["up"] = False
             if body_part["y"] == my_head["y"] - 1 and body_part["x"] == my_head["x"]:
                 is_move_safe["down"] = False
+
+    return is_move_safe
+
+# ===== STOPS SNAKE ENTERING A POTENTIAL HEAD ON IF IT IS SMALLER =====
+def prevent_head_on_collisions_if_smaller(game_state, is_move_safe):
+    my_head = game_state["you"]["body"][0]  
+    possible_moves_for_my_snake = []
+    safe_moves = [move for move, isSafe in is_move_safe.items() if isSafe]
+    for safe_move in safe_moves:
+        if safe_move == "up":
+            possible_moves_for_my_snake.append([my_head["x"], my_head["y"] + 1])
+        elif safe_move == "down":
+            possible_moves_for_my_snake.append([my_head["x"], my_head["y"] - 1])
+        elif safe_move == "left":
+            possible_moves_for_my_snake.append([my_head["x"] - 1, my_head["y"]])
+        elif safe_move == "right":
+            possible_moves_for_my_snake.append([my_head["x"] + 1, my_head["y"]])
+
+    for snake in game_state["board"]["snakes"][1:]:
+        if snake["length"] >= game_state["you"]["length"]:
+            head_positions = [[snake["head"]["x"] + 1, snake["head"]["y"]], [snake["head"]["x"] - 1, snake["head"]["y"]], [snake["head"]["x"], snake["head"]["y"] + 1], [snake["head"]["x"], snake["head"]["y"] - 1]]
+            for head_position in head_positions:
+                if head_position in possible_moves_for_my_snake:
+                    # Determine the direction of the collision and update is_move_safe accordingly
+                    if head_position[0] < my_head["x"] and len(safe_moves) > 1:
+                        is_move_safe["left"] = False
+                    if head_position[0] > my_head["x"] and len(safe_moves) > 1:
+                        is_move_safe["right"] = False
+                    if head_position[1] > my_head["y"] and len(safe_moves) > 1:
+                        is_move_safe["up"] = False
+                    if head_position[1] < my_head["y"] and len(safe_moves) > 1:
+                        is_move_safe["down"] = False
+                safe_moves = [move for move, isSafe in is_move_safe.items() if isSafe]
 
     return is_move_safe

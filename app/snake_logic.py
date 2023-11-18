@@ -1,6 +1,6 @@
 import random
 import typing
-from .utils import search_for_food_and_move, prevent_out_of_bounds_movement, prevent_collisions
+from .utils import search_for_food_and_move, prevent_out_of_bounds_movement, prevent_collisions, prevent_head_on_collisions_if_smaller
 
 # Called at battlesnake creation
 def info() -> typing.Dict:
@@ -36,7 +36,9 @@ def move(game_state: typing.Dict) -> typing.Dict:
     print("2" + str(is_move_safe))
     is_move_safe = prevent_collisions(game_state, is_move_safe)
     print("3" + str(is_move_safe))
-    print("BMFF: " + str(best_moves_for_food))
+    is_move_safe = prevent_head_on_collisions_if_smaller(game_state, is_move_safe)
+    print("4" + str(is_move_safe))
+    print("Best moves for food using A*: " + str(best_moves_for_food))
 
     # ===== CHECK FOR AVAILABLE SAFE MOVES =====
     safe_moves = [move for move, isSafe in is_move_safe.items() if isSafe]
