@@ -1,31 +1,4 @@
-# ===== ATTACK SMALLER SNAKES AND AVOID LARGER ONES =====
-def attack_smaller_and_attack_larger(game_state, is_move_safe):
-    my_head = game_state["you"]["body"][0]  
-    for snake in game_state["board"]["snakes"]:
-        # Check if the snake is smaller than us
-        if len(snake["body"]) < len(game_state["you"]["body"]):
-            head = snake["body"][0]
-            if head["x"] < my_head["x"]:
-                is_move_safe["left"] = True
-            elif head["x"] > my_head["x"]:
-                is_move_safe["right"] = True
-            elif head["y"] < my_head["y"]:
-                is_move_safe["down"] = True
-            elif head["y"] > my_head["y"]:
-                is_move_safe["up"] = True
-        # Check if the snake is larger than us
-        elif len(snake["body"]) > len(game_state["you"]["body"]):
-            head = snake["body"][0]
-            if head["x"] < my_head["x"]:
-                is_move_safe["left"] = False
-            elif head["x"] > my_head["x"]:
-                is_move_safe["right"] = False
-            elif head["y"] < my_head["y"]:
-                is_move_safe["down"] = False
-            elif head["y"] > my_head["y"]:
-                is_move_safe["up"] = False
-
-    return is_move_safe
+from algorithms import a_star_algorithm
 
 # ===== FOOD SEEKING LOGIC =====
 def search_for_food_and_move(game_state, is_move_safe, best_moves_for_food):
@@ -35,20 +8,24 @@ def search_for_food_and_move(game_state, is_move_safe, best_moves_for_food):
     if food:
         # Find the closest food
         closest_food = min(food, key=lambda f: abs(f['x'] - my_head['x']) + abs(f['y'] - my_head['y']))
-    
+        path_to_food = a_star_algorithm.a_star_search(game_state, tuple(my_head.values()), tuple(closest_food.values()))
+        print(path_to_food)
+
         # Move towards the closest food
-        if closest_food['x'] < my_head['x']:
-            is_move_safe["left"] = True
-            best_moves_for_food.append("left")
-        elif closest_food['x'] > my_head['x']:
-            is_move_safe["right"] = True
-            best_moves_for_food.append("right")
-        elif closest_food['y'] < my_head['y']:
-            is_move_safe["down"] = True
-            best_moves_for_food.append("down")
-        elif closest_food['y'] > my_head['y']:
-            is_move_safe["up"] = True
-            best_moves_for_food.append("up")
+        if path_to_food and len(path_to_food) > 1:
+            next_move = path_to_food[1]
+            if next_move[0] < my_head['x']:
+                is_move_safe["left"] = True
+                best_moves_for_food.append("left")
+            elif next_move[0] > my_head['x']:
+                is_move_safe["right"] = True
+                best_moves_for_food.append("right")
+            elif next_move[1] < my_head['y']:
+                is_move_safe["down"] = True
+                best_moves_for_food.append("down")
+            elif next_move[1] > my_head['y']:
+                is_move_safe["up"] = True
+                best_moves_for_food.append("up")
 
     return is_move_safe, best_moves_for_food
 
@@ -71,13 +48,13 @@ def prevent_backward_movement(game_state, is_move_safe):
         is_move_safe["up"] = False
 
     return is_move_safe
-    
+
 # ===== STOPS SNAKE FROM GOING OUT OF BOUNDS =====
 def prevent_out_of_bounds_movement(game_state, is_move_safe):
     my_head = game_state["you"]["body"][0]  
     board_width = game_state['board']['width']
     board_height = game_state['board']['height']
-    
+
     # The snake does not go outside from left or right
     if my_head["x"] <= 0:
         is_move_safe["left"] = False
