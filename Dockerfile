@@ -1,11 +1,19 @@
-FROM python:3.10.6-slim
+# Use an official Python runtime as a parent image
+FROM python:3.8
 
-# Install app
-WORKDIR /usr/app
-COPY . /usr/app
+# Set the working directory to /app
+WORKDIR /app
 
-# Install dependencies
-RUN pip install --upgrade pip && pip install -r requirements.txt
+# Copy the current directory contents into the container at /app
+COPY . /app
 
-# Run Battlesnake
-CMD [ "python", "main.py" ]
+# Install any needed packages specified in requirements.txt
+RUN pip install --upgrade pip
+RUN pip install -r requirements.txt
+
+# Make the start script executable
+COPY start_app.sh /app/start_app.sh
+RUN chmod +x /app/start_app.sh
+
+# Command to run your application
+CMD ["./start_app.sh"]
