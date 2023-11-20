@@ -1,1 +1,1 @@
-# Making algorithms a package
+# Packaging the algorithms folder
