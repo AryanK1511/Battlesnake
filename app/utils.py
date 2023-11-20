@@ -38,7 +38,6 @@ def search_for_food_and_move(game_state, is_move_safe, best_moves_for_food):
             # Find the closest food
             closest_food = min(food, key=lambda f: abs(f['x'] - my_head['x']) + abs(f['y'] - my_head['y']))
             path_to_food = a_star_algorithm.a_star_search(game_state, tuple(my_head.values()), tuple(closest_food.values()))
-            print(path_to_food)
             # Move towards the closest food
             if path_to_food and len(path_to_food) > 1:
                 next_move = path_to_food[1]
@@ -79,7 +78,6 @@ def prevent_out_of_bounds_movement(game_state, is_move_safe):
 
 # ===== STOPS SNAKE FROM COLLIDING WITH OTHER SNAKES AND ITSELF =====
 def prevent_collisions(game_state, is_move_safe):
-    print(game_state)
     my_head = game_state["you"]["body"][0]  
     for snake in game_state["board"]["snakes"]:
         for body_part in snake["body"]:

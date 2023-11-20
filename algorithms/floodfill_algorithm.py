@@ -52,5 +52,4 @@ def find_invalid_moves_using_floodfill(game_state, threshold):
             if floodfill_score < threshold:
                 invalid_moves.append((next_x, next_y))
 
-    print("Invalid Moves:", invalid_moves)
     return invalid_moves
