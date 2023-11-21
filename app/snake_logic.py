@@ -30,9 +30,14 @@ def move(game_state: typing.Dict) -> typing.Dict:
 
     # Movement manipulators
     is_move_safe, best_moves_for_food = search_for_food_and_move(game_state, is_move_safe, best_moves_for_food)
+    print("1" + str(is_move_safe))
     is_move_safe = prevent_out_of_bounds_movement(game_state, is_move_safe)
+    print("2" + str(is_move_safe))
     is_move_safe = prevent_collisions(game_state, is_move_safe)
+    print("3" + str(is_move_safe))
     is_move_safe = prevent_head_on_collisions_if_smaller(game_state, is_move_safe)
+    print("4" + str(is_move_safe))
+    print("Best moves for food using A*: " + str(best_moves_for_food))
 
     # ===== CHECK FOR AVAILABLE SAFE MOVES =====
     safe_moves = [move for move, isSafe in is_move_safe.items() if isSafe]

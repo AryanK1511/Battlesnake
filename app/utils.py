@@ -9,7 +9,7 @@ def search_for_food_and_move(game_state, is_move_safe, best_moves_for_food):
     if food:
         # Finding the invalid moves using floodfill
         # This is done so that we do not get ourselves into situations where we are trapped
-        moves = floodfill_algorithm.find_invalid_moves_using_floodfill(game_state, 15)
+        moves = floodfill_algorithm.find_invalid_moves_using_floodfill(game_state, 30)
         # If there are invalid moves, we follow floodfill
         if len(moves) > 0:
             for move in moves:
@@ -38,6 +38,7 @@ def search_for_food_and_move(game_state, is_move_safe, best_moves_for_food):
             # Find the closest food
             closest_food = min(food, key=lambda f: abs(f['x'] - my_head['x']) + abs(f['y'] - my_head['y']))
             path_to_food = a_star_algorithm.a_star_search(game_state, tuple(my_head.values()), tuple(closest_food.values()))
+            print(path_to_food)
             # Move towards the closest food
             if path_to_food and len(path_to_food) > 1:
                 next_move = path_to_food[1]
@@ -78,6 +79,7 @@ def prevent_out_of_bounds_movement(game_state, is_move_safe):
 
 # ===== STOPS SNAKE FROM COLLIDING WITH OTHER SNAKES AND ITSELF =====
 def prevent_collisions(game_state, is_move_safe):
+    print(game_state)
     my_head = game_state["you"]["body"][0]  
     for snake in game_state["board"]["snakes"]:
         for body_part in snake["body"]:
@@ -115,13 +117,13 @@ def prevent_head_on_collisions_if_smaller(game_state, is_move_safe):
             for head_position in head_positions:
                 if head_position in possible_moves_for_my_snake:
                     # Determine the direction of the collision and update is_move_safe accordingly
-                    if head_position[0] < my_head["x"] and len(safe_moves) > 1:
+                    if head_position[0] < my_head["x"] and len(safe_moves) > 1 and (head_position[1] == my_head["y"] or head_position[1] == my_head["y"] - 1 or head_position[1] == my_head["y"] + 1):
                         is_move_safe["left"] = False
-                    if head_position[0] > my_head["x"] and len(safe_moves) > 1:
+                    if head_position[0] > my_head["x"] and len(safe_moves) > 1 and (head_position[1] == my_head["y"] or head_position[1] == my_head["y"] - 1 or head_position[1] == my_head["y"] + 1):
                         is_move_safe["right"] = False
-                    if head_position[1] > my_head["y"] and len(safe_moves) > 1:
+                    if head_position[1] > my_head["y"] and len(safe_moves) > 1 and (head_position[0] == my_head["x"] or head_position[0] == my_head["x"] - 1 or head_position[0] == my_head["x"] + 1):
                         is_move_safe["up"] = False
-                    if head_position[1] < my_head["y"] and len(safe_moves) > 1:
+                    if head_position[1] < my_head["y"] and len(safe_moves) > 1 and (head_position[0] == my_head["x"] or head_position[0] == my_head["x"] - 1 or head_position[0] == my_head["x"] + 1):
                         is_move_safe["down"] = False
                 safe_moves = [move for move, isSafe in is_move_safe.items() if isSafe]
 
