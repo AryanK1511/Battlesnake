@@ -1,6 +1,6 @@
 import random
 import typing
-from .utils import search_for_food_and_move, prevent_out_of_bounds_movement, prevent_collisions, prevent_head_on_collisions_if_smaller
+from .utils import search_for_food_and_move, prevent_out_of_bounds_movement, prevent_collisions, trap_other_snakes, validate_next_move, prevent_head_on_collision_if_smaller
 
 # Called at battlesnake creation
 def info() -> typing.Dict:
@@ -26,25 +26,31 @@ def end(game_state: typing.Dict):
 def move(game_state: typing.Dict) -> typing.Dict:
     # Returning a dictionary at the end which tells the Battlesnake what direction to move
     is_move_safe = {"up": True, "down": True, "left": True, "right": True}
-    best_moves_for_food = []
+    best_moves_using_a_star_or_floodfill = []
 
-    # Movement manipulators
-    is_move_safe, best_moves_for_food = search_for_food_and_move(game_state, is_move_safe, best_moves_for_food)
-    print("1" + str(is_move_safe))
+    # ========== Movement manipulators ========== 
     is_move_safe = prevent_out_of_bounds_movement(game_state, is_move_safe)
-    print("2" + str(is_move_safe))
+    print("Safe moves after BOUNDARY PREVENTION CODE: " + str(is_move_safe))
+
     is_move_safe = prevent_collisions(game_state, is_move_safe)
-    print("3" + str(is_move_safe))
-    is_move_safe = prevent_head_on_collisions_if_smaller(game_state, is_move_safe)
-    print("4" + str(is_move_safe))
-    print("Best moves for food using A*: " + str(best_moves_for_food))
+    print("Safe moves after COLLISION PREVENTION CODE: " + str(is_move_safe))
+
+    is_move_safe = prevent_head_on_collision_if_smaller(game_state, is_move_safe)
+    print("Safe moves after HEAD-ON COLLISION PREVENTION CODE: " + str(is_move_safe))
+
+    is_move_safe = trap_other_snakes(game_state, is_move_safe)
+    print("Safe moves after TRAP OTHER SNAKES " + str(is_move_safe))
+
+    is_move_safe, best_moves_using_a_star_or_floodfill = search_for_food_and_move(game_state, is_move_safe, best_moves_using_a_star_or_floodfill)
+    print("Safe moves after A* AND FLOODFILL" + str(is_move_safe))
+    print("Best moves after A* AND FLOODFILL: " + str(best_moves_using_a_star_or_floodfill))
 
     # ===== CHECK FOR AVAILABLE SAFE MOVES =====
     safe_moves = [move for move, isSafe in is_move_safe.items() if isSafe]
 
     # Choose a random move from the safe ones
-    if len(best_moves_for_food) > 0 and best_moves_for_food[0] in safe_moves:
-        next_move = best_moves_for_food[0]
+    if len(best_moves_using_a_star_or_floodfill) > 0 and best_moves_using_a_star_or_floodfill[0] in safe_moves:
+        next_move = best_moves_using_a_star_or_floodfill[0]
     else:
         if len(safe_moves) > 0:
             next_move = random.choice(safe_moves)
