@@ -74,19 +74,20 @@ def prevent_out_of_bounds_movement(game_state, is_move_safe):
 # ===== STOPS SNAKE FROM COLLIDING WITH OTHER SNAKES AND ITSELF =====
 def prevent_collisions(game_state, is_move_safe):
     print(game_state)
-    my_head = game_state["you"]["body"][0]  
+    my_head = game_state["you"]["body"][0]
+    my_tail = game_state["you"]["body"][game_state["you"]["length"]-1]
     for snake in game_state["board"]["snakes"]:
         for body_part in snake["body"]:
             # To prevent horizontal collsions
             if body_part["x"] == my_head["x"] - 1 and body_part["y"] == my_head["y"]:
-                is_move_safe["left"] = False
+                if body_part != my_tail: is_move_safe["left"] = False # Don't update is_move_safe if it's our tail, as we can move to the cell where our tail is safely (it'll move forward)
             if body_part["x"] == my_head["x"] + 1 and body_part["y"] == my_head["y"]:
-                is_move_safe["right"] = False
+                if body_part != my_tail: is_move_safe["right"] = False
             # To prevent vertical collisions
             if body_part["y"] == my_head["y"] + 1 and body_part["x"] == my_head["x"]:
-                is_move_safe["up"] = False
+                if body_part != my_tail: is_move_safe["up"] = False
             if body_part["y"] == my_head["y"] - 1 and body_part["x"] == my_head["x"]:
-                is_move_safe["down"] = False
+                if body_part != my_tail: is_move_safe["down"] = False
 
     return is_move_safe
 
@@ -94,15 +95,38 @@ def prevent_collisions(game_state, is_move_safe):
 def prevent_head_on_collision_if_smaller(game_state, is_move_safe):
     possible_moves_for_our_snake = {"left": (game_state["you"]["body"][0]["x"] - 1, game_state["you"]["body"][0]["y"]), "right": (game_state["you"]["body"][0]["x"] + 1, game_state["you"]["body"][0]["y"]), "up": (game_state["you"]["body"][0]["x"], game_state["you"]["body"][0]["y"] + 1), "down": (game_state["you"]["body"][0]["x"], game_state["you"]["body"][0]["y"] - 1)}
     # if len(get_safe_moves(game_state, is_move_safe)) > 1:
+    questionable_moves = {}
     for possible_move in possible_moves_for_our_snake:
         for snake in game_state["board"]["snakes"]:
             if snake != game_state["you"]:
                 possible_moves_for_other_snake = [(snake["head"]["x"] - 1, snake["head"]["y"]), (snake["head"]["x"] + 1, snake["head"]["y"]), (snake["head"]["x"], snake["head"]["y"] - 1), (snake["head"]["x"], snake["head"]["y"] + 1)]
                 if possible_moves_for_our_snake[possible_move] in possible_moves_for_other_snake and snake["length"] >= game_state["you"]["length"]:
                     print(is_move_safe[possible_move])
-                    is_move_safe[possible_move] = False
+                    questionable_moves[possible_move] = snake["head"]
+                    #is_move_safe[possible_move] = False
 
+    for move in questionable_moves:
+        head = questionable_moves[move]
+        closest_food = min(food, key=lambda f: abs(f['x'] - head['x']) + abs(f['y'] - head['y']))
+        path_to_food = a_star_algorithm.a_star_search(game_state, tuple(head.values()), tuple(closest_food.values()))
+        
+        if path_to_food and len(path_to_food) > 1:
+            next_move = path_to_food[1]
+            
+            if next_move[0] < head['x']:
+                head["x"] -= 1
+            elif next_move[0] > head['x']:
+                head["x"] += 1
+            elif next_move[1] < head['y']:
+                head["y"] -= 1
+            elif next_move[1] > head['y']:
+                head["y"] += 1
+        
+        if tuple(head["x"], head["y"]) == questionable_moves[move]:
+            is_move_safe[move] = False
+    
     return is_move_safe
+    
 
 # ===== TRAPS SNAKES SO THAT THEY SELF DESTRUCT =====
 def trap_other_snakes(game_state, is_move_safe):
