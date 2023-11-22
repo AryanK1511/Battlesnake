@@ -1,6 +1,6 @@
 import random
 import typing
-from .utils import search_for_food_and_move, prevent_out_of_bounds_movement, prevent_collisions, trap_other_snakes, validate_next_move, prevent_head_on_collision_if_smaller
+from .utils import search_for_food_and_move, prevent_out_of_bounds_movement, prevent_collisions, prevent_head_on_collision_if_smaller
 
 # Called at battlesnake creation
 def info() -> typing.Dict:
@@ -29,6 +29,7 @@ def move(game_state: typing.Dict) -> typing.Dict:
     best_moves_using_a_star_or_floodfill = []
 
     # ========== Movement manipulators ========== 
+    print("\n===========================================================================")
     is_move_safe = prevent_out_of_bounds_movement(game_state, is_move_safe)
     print("Safe moves after BOUNDARY PREVENTION CODE: " + str(is_move_safe))
 
@@ -38,12 +39,10 @@ def move(game_state: typing.Dict) -> typing.Dict:
     is_move_safe = prevent_head_on_collision_if_smaller(game_state, is_move_safe)
     print("Safe moves after HEAD-ON COLLISION PREVENTION CODE: " + str(is_move_safe))
 
-    is_move_safe = trap_other_snakes(game_state, is_move_safe)
-    print("Safe moves after TRAP OTHER SNAKES " + str(is_move_safe))
-
     is_move_safe, best_moves_using_a_star_or_floodfill = search_for_food_and_move(game_state, is_move_safe, best_moves_using_a_star_or_floodfill)
     print("Safe moves after A* AND FLOODFILL" + str(is_move_safe))
     print("Best moves after A* AND FLOODFILL: " + str(best_moves_using_a_star_or_floodfill))
+    print("===========================================================================")
 
     # ===== CHECK FOR AVAILABLE SAFE MOVES =====
     safe_moves = [move for move, isSafe in is_move_safe.items() if isSafe]
